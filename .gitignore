@@ -1,0 +1,164 @@
+# ========================================
+# Node.js Dependencies
+# ========================================
+node_modules/
+*/node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ========================================
+# Build Outputs
+# ========================================
+# Backend (NestJS)
+cms-backend/dist/
+cms-backend/build/
+
+# Frontend (Next.js)
+cms-frontend/.next/
+cms-frontend/out/
+cms-frontend/build/
+
+# General
+/dist
+/build
+*.tsbuildinfo
+
+# ========================================
+# Environment Variables & Secrets
+# ========================================
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+*.pem
+
+# ========================================
+# Logs
+# ========================================
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ========================================
+# Testing
+# ========================================
+coverage/
+.nyc_output/
+*.lcov
+
+# ========================================
+# Next.js Specific
+# ========================================
+next-env.d.ts
+.vercel
+
+# ========================================
+# Database
+# ========================================
+# Prisma
+cms-backend/prisma/*.db
+cms-backend/prisma/*.db-journal
+
+# ========================================
+# Operating System
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ========================================
+# IDEs and Editors
+# ========================================
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# WebStorm/IntelliJ
+/.idea
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# Eclipse
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# ========================================
+# Temporary Files
+# ========================================
+.temp/
+.tmp/
+*.tmp
+*.bak
+*.cache
+
+# ========================================
+# Runtime Data
+# ========================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ========================================
+# Diagnostic Reports
+# ========================================
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# ========================================
+# Docker
+# ========================================
+docker-compose.override.yml
+
+# ========================================
+# MacOS
+# ========================================
+.AppleDouble
+.LSOverride
+
+# ========================================
+# Optional: Keep these patterns if needed
+# ========================================
+# Uncomment to ignore documentation images/demos
+# demo/
+# *.png
+# *.jpg
