@@ -1,0 +1,849 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Full-Stack CMS API",
+    "description": "Enterprise-grade REST API for a full-stack CMS with JWT auth and RBAC",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Development"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["health"],
+        "summary": "API Status",
+        "description": "Check if API is running",
+        "responses": {
+          "200": {
+            "description": "API is running"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health Check",
+        "description": "Health check for load balancers and K8s probes",
+        "responses": {
+          "200": {
+            "description": "Service is healthy"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Login",
+        "description": "Authenticate user and get JWT token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "admin@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "changeme123"
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "400": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["users"],
+        "summary": "List Users",
+        "description": "Get paginated list of users (Admin only)",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Get User by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["users"],
+        "summary": "Update User",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Delete User",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          }
+        }
+      }
+    },
+    "/users/{id}/status": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "Update User Status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isActive": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User status updated"
+          }
+        }
+      }
+    },
+    "/roles": {
+      "post": {
+        "tags": ["roles"],
+        "summary": "Create Role",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "editor" },
+                  "description": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role created"
+          }
+        }
+      },
+      "get": {
+        "tags": ["roles"],
+        "summary": "List Roles",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles retrieved"
+          }
+        }
+      }
+    },
+    "/roles/{id}": {
+      "get": {
+        "tags": ["roles"],
+        "summary": "Get Role by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role retrieved"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["roles"],
+        "summary": "Update Role",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["roles"],
+        "summary": "Delete Role",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role deleted"
+          }
+        }
+      }
+    },
+    "/roles/{id}/permissions": {
+      "patch": {
+        "tags": ["roles"],
+        "summary": "Assign Permissions to Role",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "permissionIds": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Permissions assigned"
+          }
+        }
+      }
+    },
+    "/permissions": {
+      "post": {
+        "tags": ["permissions"],
+        "summary": "Create Permission",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": { "type": "string", "example": "blog.create" },
+                  "description": { "type": "string" }
+                },
+                "required": ["key"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Permission created"
+          }
+        }
+      },
+      "get": {
+        "tags": ["permissions"],
+        "summary": "List Permissions",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permissions retrieved"
+          }
+        }
+      }
+    },
+    "/blogs": {
+      "post": {
+        "tags": ["blogs"],
+        "summary": "Create Blog Post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": { "type": "string" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["draft", "published"]
+                  },
+                  "translations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "languageCode": { "type": "string" },
+                        "title": { "type": "string" },
+                        "content": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "EnglishAndArabic": {
+                  "value": {
+                    "slug": "getting-started-with-nextjs",
+                    "status": "published",
+                    "translations": [
+                      {
+                        "languageCode": "en",
+                        "title": "Getting Started with Next.js",
+                        "content": "Next.js is a React framework for building fast, modern web applications. In this comprehensive guide, we'll explore the foundational concepts, best practices, and advanced techniques to help you build scalable applications. Learn about server-side rendering, static generation, API routes, and more."
+                      },
+                      {
+                        "languageCode": "ar",
+                        "title": "البدء مع Next.js",
+                        "content": "Next.js هو إطار عمل React لبناء تطبيقات ويب سريعة وحديثة. في هذا الدليل الشامل، سوف نستكشف المفاهيم الأساسية وأفضل الممارسات والتقنيات المتقدمة لمساعدتك في بناء تطبيقات قابلة للتوسع. تعرف على العرض من جانب الخادم والتوليد الثابت ومسارات واجهة برمجة التطبيقات والمزيد."
+                      }
+                    ]
+                  }
+                },
+                "TechTutorial": {
+                  "value": {
+                    "slug": "mastering-typescript-generics",
+                    "status": "draft",
+                    "translations": [
+                      {
+                        "languageCode": "en",
+                        "title": "Mastering TypeScript Generics",
+                        "content": "TypeScript generics allow you to create flexible and reusable code components. This tutorial covers generic functions, interfaces, classes, and constraints. Understand how to write type-safe code that works with multiple data types while maintaining full type checking."
+                      },
+                      {
+                        "languageCode": "ar",
+                        "title": "إتقان النوع العام في TypeScript",
+                        "content": "تسمح النماذج العامة في TypeScript بإنشاء مكونات كود مرنة وقابلة لإعادة الاستخدام. يغطي هذا البرنامج التعليمي الوظائف والواجهات والفئات العامة والقيود. افهم كيفية كتابة كود آمن من النوع يعمل مع أنواع بيانات متعددة مع الحفاظ على التحقق الكامل من النوع."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Blog created"
+          }
+        }
+      },
+      "get": {
+        "tags": ["blogs"],
+        "summary": "List Blog Posts (Admin)",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blogs retrieved"
+          }
+        }
+      }
+    },
+    "/blogs/public": {
+      "get": {
+        "tags": ["blogs"],
+        "summary": "List Published Blogs (Public)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": { "type": "string", "default": "en" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Published blogs retrieved"
+          }
+        }
+      }
+    },
+    "/blogs/{id}": {
+      "get": {
+        "tags": ["blogs"],
+        "summary": "Get Blog by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog retrieved"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["blogs"],
+        "summary": "Update Blog",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": { "type": "string" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["draft", "published"]
+                  },
+                  "translations": { "type": "array" }
+                }
+              },
+              "examples": {
+                "UpdateToPublished": {
+                  "value": {
+                    "status": "published",
+                    "slug": "getting-started-with-nextjs",
+                    "translations": [
+                      {
+                        "languageCode": "en",
+                        "title": "Getting Started with Next.js - Updated",
+                        "content": "Next.js is a React framework for building fast, modern web applications. This updated version includes new sections on App Router, Server Actions, and performance optimization techniques."
+                      },
+                      {
+                        "languageCode": "ar",
+                        "title": "البدء مع Next.js - تم التحديث",
+                        "content": "Next.js هو إطار عمل React لبناء تطبيقات ويب سريعة وحديثة. تتضمن هذه الإصدارة المحدثة أقسام جديدة حول جهاز التوجيه والإجراءات من جانب الخادم وتقنيات تحسين الأداء."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["blogs"],
+        "summary": "Delete Blog",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog deleted"
+          }
+        }
+      }
+    },
+    "/news": {
+      "post": {
+        "tags": ["news"],
+        "summary": "Create News Item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": { "type": "string" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["draft", "published"]
+                  },
+                  "publishedAt": { "type": "string", "format": "date-time" },
+                  "expiresAt": { "type": "string", "format": "date-time" },
+                  "translations": { "type": "array" }
+                }
+              },
+              "examples": {
+                "CorporateAnnouncementEnglishArabic": {
+                  "value": {
+                    "slug": "new-product-launch-2026",
+                    "status": "published",
+                    "publishedAt": "2026-02-20T10:00:00Z",
+                    "expiresAt": "2026-03-20T23:59:59Z",
+                    "translations": [
+                      {
+                        "languageCode": "en",
+                        "title": "Exciting Product Launch Announcement",
+                        "content": "We are thrilled to announce the launch of our revolutionary new product that will transform the industry. This innovative solution combines cutting-edge technology with user-friendly design to deliver unprecedented value to our customers. Pre-orders are now open with special launch pricing available for early adopters."
+                      },
+                      {
+                        "languageCode": "ar",
+                        "title": "إعلان إطلاق منتج مثير",
+                        "content": "نحن سعداء بالإعلان عن إطلاق منتجنا الثوري الجديد الذي سيحول الصناعة. تجمع هذه الحل المبتكرة بين أحدث التقنيات وتصميم سهل الاستخدام لتقديم قيمة لا مثيل لها لعملائنا. الطلبات المسبقة متاحة الآن مع أسعار إطلاق خاصة للمتبنين الأوائل."
+                      }
+                    ]
+                  }
+                },
+                "BreakingNewsEnglishArabic": {
+                  "value": {
+                    "slug": "industry-conference-opens-registration",
+                    "status": "draft",
+                    "publishedAt": "2026-02-25T09:00:00Z",
+                    "expiresAt": "2026-03-10T18:00:00Z",
+                    "translations": [
+                      {
+                        "languageCode": "en",
+                        "title": "Registration Opens for Tech Summit 2026",
+                        "content": "The annual Technology Summit 2026 is coming this spring with industry leaders and innovators. Join thousands of professionals for three days of keynote presentations, hands-on workshops, and networking opportunities. Early bird registration is open with a 30% discount for registrations made before March 5th."
+                      },
+                      {
+                        "languageCode": "ar",
+                        "title": "يبدأ التسجيل لقمة التكنولوجيا 2026",
+                        "content": "تقدم قمة التكنولوجيا السنوية 2026 هذا الربيع مع قادة الصناعة والمبتكرين. انضم إلى آلاف المحترفين لمدة ثلاثة أيام من المحاضرات الرئيسية والورش العملية وفرص التواصل. التسجيل المبكر مفتوح مع خصم 30% للتسجيلات المرسلة قبل 5 مارس."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "News created"
+          }
+        }
+      },
+      "get": {
+        "tags": ["news"],
+        "summary": "List News (Admin)",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News retrieved"
+          }
+        }
+      }
+    },
+    "/news/public": {
+      "get": {
+        "tags": ["news"],
+        "summary": "List Published News (Public)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": { "type": "string", "default": "en" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Published news retrieved"
+          }
+        }
+      }
+    },
+    "/news/{id}": {
+      "get": {
+        "tags": ["news"],
+        "summary": "Get News by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News retrieved"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["news"],
+        "summary": "Update News",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": { "type": "string" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["draft", "published"]
+                  },
+                  "publishedAt": { "type": "string", "format": "date-time" },
+                  "expiresAt": { "type": "string", "format": "date-time" },
+                  "translations": { "type": "array" }
+                }
+              },
+              "examples": {
+                "UpdateStatusAndContent": {
+                  "value": {
+                    "status": "published",
+                    "publishedAt": "2026-02-20T12:00:00Z",
+                    "expiresAt": "2026-04-20T23:59:59Z",
+                    "slug": "industry-conference-opens-registration",
+                    "translations": [
+                      {
+                        "languageCode": "en",
+                        "title": "Tech Summit 2026 - Registration Now Open!",
+                        "content": "Updated: We're very pleased to announce that registration for Tech Summit 2026 is now officially open. Due to overwhelming demand, we're adding additional keynote sessions and workshop tracks. The conference will host over 50 speakers and 100+ workshops across five days. Join us for an unforgettable experience."
+                      },
+                      {
+                        "languageCode": "ar",
+                        "title": "قمة التكنولوجيا 2026 - التسجيل مفتوح الآن!",
+                        "content": "تم التحديث: نحن سعداء جداً بالإعلان بأن التسجيل لقمة التكنولوجيا 2026 مفتوح الآن رسمياً. نظراً للطلب الساحق، نضيف جلسات رئيسية إضافية ومسارات ورش عمل. ستستضيف المؤتمرة أكثر من 50 متحدثاً و 100+ ورشة عمل عبر خمسة أيام. انضم إلينا في تجربة لن تُنسى."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "News updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["news"],
+        "summary": "Delete News",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News deleted"
+          }
+        }
+      }
+    }
+  }
+}

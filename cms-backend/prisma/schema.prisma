@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  roles        UserRole[]
+  blogs        Blog[]    @relation("AuthorBlogs")
+  news         News[]    @relation("AuthorNews")
+}
+
+model Role {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String          @unique
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(uuid()) @db.Uuid
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  user   User @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId String @db.Uuid
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  role         Role @relation(fields: [roleId], references: [id])
+  roleId       String @db.Uuid
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String @db.Uuid
+
+  @@id([roleId, permissionId])
+}
+
+model Blog {
+  id         String             @id @default(uuid()) @db.Uuid
+  slug       String             @unique
+  status     String             @default("draft")
+  author     User?              @relation("AuthorBlogs", fields: [authorId], references: [id])
+  authorId   String?            @db.Uuid
+  publishedAt DateTime?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  translations BlogTranslation[]
+
+  @@index([slug])
+  @@index([publishedAt])
+}
+
+model BlogTranslation {
+  id           String  @id @default(uuid()) @db.Uuid
+  blog         Blog    @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blogId       String  @db.Uuid
+  languageCode String
+  title        String
+  content      String
+
+  @@unique([blogId, languageCode])
+}
+
+model News {
+  id         String            @id @default(uuid()) @db.Uuid
+  slug       String            @unique
+  status     String            @default("draft")
+  author     User?             @relation("AuthorNews", fields: [authorId], references: [id])
+  authorId   String?           @db.Uuid
+  publishedAt DateTime?
+  expiresAt   DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  translations NewsTranslation[]
+
+  @@index([slug])
+  @@index([publishedAt])
+}
+
+model NewsTranslation {
+  id           String  @id @default(uuid()) @db.Uuid
+  news         News    @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  newsId       String  @db.Uuid
+  languageCode String
+  title        String
+  content      String
+
+  @@unique([newsId, languageCode])
+}
